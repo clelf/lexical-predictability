@@ -52,7 +52,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
         # For every word tested, vary context length from very local (previous word) to very global (all available previous words)
         context_lengthes = range(1, word_id + 1)
 
-        for context_length in tqdm(context_lengthes):
+        for context_length in context_lengthes:
             encoded_input_cropped_context = crop_context(encoded_input, word_id, context_length)
             pred = get_next_word_predictability(model, tokenizer, encoded_input_cropped_context, word)
 
