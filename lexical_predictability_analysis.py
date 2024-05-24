@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 
 # Load to GPU
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(f'Device: {device}')
 
 
 def get_next_word_predictability(model, tokenizer, encoded_input, next_word):
