@@ -1,3 +1,5 @@
+import sys
+
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel, BatchEncoding
 import os
 import pandas as pd
@@ -46,7 +48,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     preds = []
 
     # Test word predictability for every word in sample one by one
-    for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), position=2, leave=False, desc="Single word"):
+    for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), position=0, leave=False, desc="Single word"):
         # Start at second word, to have at least 1 previous word of context
         if word_id == 0: continue
 
@@ -67,6 +69,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
                 "word": tokenizer.decode(word) # [word] ?
             })
 
+
     return preds
 
 
@@ -84,7 +87,8 @@ def lexical_predictability_analysis(data_path, compare_original=False):
     if compare_original: preds_o = []
 
     # Iterate over disorder level, samples and individual words
-    for level in tqdm(data.disorder_level.unique(), leave=True, position=0, desc="Disorder level"):
+    for level in data.disorder_level.unique():
+        print(f"Disorder level: {level*100:.0f}%")
         data_level = data[data['disorder_level'] == level]
 
         for sample_id, sample in tqdm(data_level.iterrows(), total=len(data_level), leave=True, position=1, desc="Samples"):
