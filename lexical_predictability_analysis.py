@@ -23,7 +23,7 @@ def get_next_word_predictability(model, tokenizer, encoded_input, next_word):
     # preds = F.softmax(output.scores[0], dim=-1)
         output = model(**encoded_input)
         preds = F.softmax(output.logits, dim=-1)
-    pred_word = preds[:, :, next_word].item()
+    pred_word = preds[:, -1, next_word].item() # Get prediction predictions of last token for the next one
     return pred_word
 
 
