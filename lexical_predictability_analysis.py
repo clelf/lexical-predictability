@@ -18,10 +18,12 @@ def get_next_word_predictability(model, tokenizer, encoded_input, next_word):
     # next_word is a token_id, i.e. the id of the token within the tokenizer's vocabulary
     with torch.no_grad():  # useful line?
         # do_sample? temperature?
-        output = model.generate(**encoded_input, max_new_tokens=1, output_scores=True, return_dict_in_generate=True,
-                                pad_token_id=tokenizer.eos_token_id)
-    preds = F.softmax(output.scores[0], dim=-1)
-    pred_word = preds[:,next_word].item()
+    #     output = model.generate(**encoded_input, max_new_tokens=1, output_scores=True, return_dict_in_generate=True,
+    #                             pad_token_id=tokenizer.eos_token_id)
+    # preds = F.softmax(output.scores[0], dim=-1)
+        output = model(**encoded_input)
+        preds = F.softmax(output.logits, dim=-1)
+    pred_word = preds[:, :, next_word].item()
     return pred_word
 
 
