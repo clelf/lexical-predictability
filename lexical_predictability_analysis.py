@@ -46,7 +46,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     preds = []
 
     # Test word predictability for every word in sample one by one
-    for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), position=0, leave=True):
+    for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), leave=True, desc="Single word"):
         # Start at second word, to have at least 1 previous word of context
         if word_id == 0: continue
 
@@ -84,10 +84,10 @@ def lexical_predictability_analysis(data_path, compare_original=False):
     if compare_original: preds_o = []
 
     # Iterate over disorder level, samples and individual words
-    for level in tqdm(data.disorder_level.unique(), position=0, leave=True):
+    for level in tqdm(data.disorder_level.unique(), leave=True, desc="Disorder level"):
         data_level = data[data['disorder_level'] == level]
 
-        for sample_id, sample in tqdm(data_level.iterrows(), total=len(data_level), position=0, leave=True):
+        for sample_id, sample in tqdm(data_level.iterrows(), total=len(data_level), leave=True, desc="Samples"):
             # Get word-by-word predictability scores, varying context length for each word, for given sample
             preds_sample = word_by_word_predictability(model, tokenizer, sample['text_shuffled'], sample_id, level)
             preds.extend(preds_sample)
