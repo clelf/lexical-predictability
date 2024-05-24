@@ -3,3 +3,4 @@ text_samples/
 text_samples_test/
 text_samples_trunc/
 text_samples_trunc_gpt2tokenfast/
+*.csv
