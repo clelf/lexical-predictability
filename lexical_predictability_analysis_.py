@@ -1,4 +1,4 @@
-from transformers import GPT2Tokenizer, GPT2LMHeadModel, BatchEncoding
+from transformers import GPT2TokenizerFast, GPT2LMHeadModel, BatchEncoding
 import os
 import pandas as pd
 import torch
@@ -63,7 +63,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
                 "context_length": context_length,
                 "predictability": pred,
                 "word_token": word,
-                "word": tokenizer.decode(word)
+                "word": tokenizer.decode(word) # [word] ?
             })
 
     return preds
@@ -74,7 +74,7 @@ def lexical_predictability_analysis(data_path, compare_original=False):
     data = pd.read_csv(os.path.join(data_path, "text_samples.csv"))
 
     # Define and load model
-    tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+    tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
     model = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
     model.eval()
 
