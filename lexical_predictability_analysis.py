@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import torch
 import torch.nn.functional as F
-from tqdm import tqdm
+from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 
 
@@ -46,7 +46,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     preds = []
 
     # Test word predictability for every word in sample one by one
-    for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), leave=True, position=2, desc="Single word"):
+    for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), position=2, leave=False, desc="Single word"):
         # Start at second word, to have at least 1 previous word of context
         if word_id == 0: continue
 
