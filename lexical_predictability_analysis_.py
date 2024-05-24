@@ -7,6 +7,10 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
+# Load to GPU
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
+
 def get_next_word_predictability(model, tokenizer, encoded_input, next_word):
     # next_word is a token_id, i.e. the id of the token within the tokenizer's vocabulary
     with torch.no_grad():  # useful line?
@@ -34,7 +38,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     """
 
     # Tokenize sample
-    encoded_input = tokenizer(text_sample, return_tensors='pt')
+    encoded_input = tokenizer(text_sample, return_tensors='pt').to(device)
     encoded_input_ids = encoded_input.input_ids.squeeze()
 
     # Create list to store predictability scores
@@ -71,7 +75,8 @@ def lexical_predictability_analysis(data_path, compare_original=False):
 
     # Define and load model
     tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
-    model = GPT2LMHeadModel.from_pretrained('gpt2')
+    model = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
+    model.eval()
 
     # Create list to store predictability scores
     preds = []
