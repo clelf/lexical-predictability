@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 import random
 
@@ -70,7 +71,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), position=0, leave=False, desc="Single word"):
         # Start at second word, to have at least 1 previous word of context
         if word_id == 0: continue
-        if random.random() > 0.1 != 0: continue # sample 1/10th of word ids
+        if random.random() < word_id / len(encoded_input_ids) != 0: continue # sample 1/10th of word ids
 
         # For every word tested, vary context length from very local (previous word) to very global (all available previous words)
         context_lengths_word = np.append(context_lengths[context_lengths<word_id], word_id)
@@ -129,7 +130,6 @@ def lexical_predictability_analysis(data_path, compare_original=False):
 
             if sample_id == 1: break # TODO: delete line
 
-        break # TODO: delete too
 
     # Convert data to DataFrame
     preds = pd.DataFrame(preds)
@@ -143,13 +143,20 @@ def lexical_predictability_analysis(data_path, compare_original=False):
 
 
 def visualize_predictability(df_preds):
-    # for level in disorder_levels:
-    #     plot(preds[level].context_length, preds[level].pred)
+    for level in df_preds.disorder_level.unique():
+        sns.lineplot(data=df_preds[df_preds['disorder_level'] == level], x='context_length', y='predictability',
+                     errorbar='sd')
+        plt.show()
+        #plt.save(...)
 
     pass
 
 
 if __name__ == '__main__':
-    df_preds = lexical_predictability_analysis(data_path="text_samples_trunc_gpt2tokenfast")
-    df_preds.to_csv("pred_scores_1samples.csv")
+    compute_pred=False
+    if compute_pred:
+        df_preds = lexical_predictability_analysis(data_path="text_samples_trunc_gpt2tokenfast")
+        df_preds.to_csv("pred_scores_1sample_10levels.csv", index=False)
+    else:
+        df_preds = pd.read_csv("pred_scores_1samples.csv", index_col=[0])
     visualize_predictability(visualize_predictability(df_preds))
