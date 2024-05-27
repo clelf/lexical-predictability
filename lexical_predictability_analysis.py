@@ -123,7 +123,7 @@ def lexical_predictability_analysis(data_path, compare_original=False):
                 # Also get predictability scores for original sample
                 preds_o.extend(word_by_word_predictability(model, tokenizer, sample['text_original'], sample_id, level))
 
-            if sample_id == 10: break # TODO: delete line
+            if sample_id == 1: break # TODO: delete line
 
     # Convert data to DataFrame
     preds = pd.DataFrame(preds)
@@ -145,5 +145,5 @@ def visualize_predictability(df_preds):
 
 if __name__ == '__main__':
     df_preds = lexical_predictability_analysis(data_path="text_samples_trunc_gpt2tokenfast")
-    df_preds.to_csv("pred_scores_10samples.csv")
+    df_preds.to_csv("pred_scores_1samples.csv")
     visualize_predictability(visualize_predictability(df_preds))
