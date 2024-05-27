@@ -126,6 +126,8 @@ def lexical_predictability_analysis(data_path, compare_original=False):
 
             if sample_id == 1: break # TODO: delete line
 
+        break # TODO: delete too
+
     # Convert data to DataFrame
     preds = pd.DataFrame(preds)
 
