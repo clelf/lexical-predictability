@@ -65,7 +65,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     context_lengths = np.unique(np.logspace(0, np.log10(tokenizer.model_max_length- 2), num=22, dtype=int))
 
     # Test word predictability for every word in sample one by one
-    for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), position=0, leave=False, desc="Single word"):
+    for word_id, word in tqdm(enumerate(encoded_input_ids[::10]), total=len(encoded_input_ids), position=0, leave=False, desc="Single word"):
         # Start at second word, to have at least 1 previous word of context
         if word_id == 0: continue
 
@@ -103,6 +103,7 @@ def lexical_predictability_analysis(data_path, compare_original=False):
     # Define and load model
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
     model = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
+    model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
     model.eval()
 
     # Create list to store predictability scores
