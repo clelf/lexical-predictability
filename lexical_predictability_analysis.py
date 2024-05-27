@@ -22,7 +22,8 @@ def get_next_word_predictability(model, encoded_input, next_word):
     #     output = model.generate(**encoded_input, max_new_tokens=1, output_scores=True, return_dict_in_generate=True,
     #                             pad_token_id=tokenizer.eos_token_id)
     # preds = F.softmax(output.scores[0], dim=-1)
-        output = model(**encoded_input)
+    #     output = model(**encoded_input)
+        output = model(encoded_input)
         preds = F.softmax(output.logits, dim=-1)
     pred_word = preds[:, -1, next_word].item() # Get prediction predictions of last token for the next one
     return pred_word
@@ -51,7 +52,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     # encoded_input = tokenizer(text_sample, return_tensors='pt').to(device)
     # encoded_input_ids = encoded_input.input_ids.squeeze()
     encoded_input = tokenizer.encode(text_sample, return_tensors='pt').to(device)
-    encoded_input_ids = encoded_input.tolist()
+    encoded_input_ids = encoded_input.squeeze().tolist()
 
     # Store all encoded input later cropped by context
     # inputs = []
@@ -124,7 +125,11 @@ def lexical_predictability_analysis(data_path, compare_original=False):
 
             if sample_id == 10: break # TODO: delete line
 
+    # Convert data to DataFrame
+    preds = pd.DataFrame(preds)
+
     if compare_original:
+        preds_o = pd.DataFrame(preds_o)
         preds = pd.merge(preds, preds_o, on=['disorder_level', 'sample_id', 'context_length', 'word_pos'],
                      suffixes=('_shuf', '_o'))
 
