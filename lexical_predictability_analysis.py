@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 # Load to GPU
@@ -14,7 +15,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f'Device: {device}')
 
 
-def get_next_word_predictability(model, tokenizer, encoded_input, next_word):
+def get_next_word_predictability(model, encoded_input, next_word):
     # next_word is a token_id, i.e. the id of the token within the tokenizer's vocabulary
     with torch.no_grad():  # useful line?
         # do_sample? temperature?
@@ -30,8 +31,12 @@ def get_next_word_predictability(model, tokenizer, encoded_input, next_word):
 def crop_context(input, word_id, context_length):
     # input is an Encoding instance containing items like tensor_ids and attention_mask
     # returns an Encoding instance with tensors cropped to a length of context_length before word_id
-    cropped_input = {key: input[key][:, word_id - context_length:word_id] for key in input.keys()}
-    return BatchEncoding(cropped_input)
+    if isinstance(input, dict):
+        cropped_input = {key: input[key][:, word_id - context_length:word_id] for key in input.keys()}
+        return BatchEncoding(cropped_input)
+    elif isinstance(input, torch.Tensor):
+        cropped_input = input[:, word_id - context_length:word_id]
+        return cropped_input
 
 
 def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level):
@@ -43,11 +48,20 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
     """
 
     # Tokenize sample
-    encoded_input = tokenizer(text_sample, return_tensors='pt').to(device)
-    encoded_input_ids = encoded_input.input_ids.squeeze()
+    # encoded_input = tokenizer(text_sample, return_tensors='pt').to(device)
+    # encoded_input_ids = encoded_input.input_ids.squeeze()
+    encoded_input = tokenizer.encode(text_sample, return_tensors='pt').to(device)
+    encoded_input_ids = encoded_input.tolist()
+
+    # Store all encoded input later cropped by context
+    # inputs = []
+    # words_test = []
 
     # Create list to store predictability scores
     preds = []
+
+    # Create context length scale: logarithmic to optimize evaluation
+    context_lengths = np.unique(np.logspace(0, np.log10(tokenizer.model_max_length- 2), num=22, dtype=int))
 
     # Test word predictability for every word in sample one by one
     for word_id, word in tqdm(enumerate(encoded_input_ids), total=len(encoded_input_ids), position=0, leave=False, desc="Single word"):
@@ -55,22 +69,28 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level)
         if word_id == 0: continue
 
         # For every word tested, vary context length from very local (previous word) to very global (all available previous words)
-        context_lengthes = range(1, word_id + 1)
+        context_lengths_word = np.append(context_lengths[context_lengths<word_id], word_id)
 
-        for context_length in context_lengthes:
+        for context_length in context_lengths_word:
             encoded_input_cropped_context = crop_context(encoded_input, word_id, context_length)
-            pred = get_next_word_predictability(model, tokenizer, encoded_input_cropped_context, word)
+
+            # inputs.append(encoded_input_cropped_context) # modif
+            # words_test.append(word) # modif
+
+            pred = get_next_word_predictability(model, encoded_input_cropped_context, word)
 
             preds.append({
                 "disorder_level": level,
                 "sample_id": sample_id,
                 "word_pos": word_id,
                 "context_length": context_length,
-                "predictability": pred,
+                "predictability": pred, # modif
+                # "inputs_id": len(inputs), # modif
                 "word_token": word,
                 "word": tokenizer.decode(word) # [word] ?
             })
 
+    # preds = get_next_word_predictability(model, inputs, words_test)
 
     return preds
 
