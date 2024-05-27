@@ -153,10 +153,10 @@ def visualize_predictability(df_preds):
 
 
 if __name__ == '__main__':
-    compute_pred=False
+    compute_pred=True
     if compute_pred:
         df_preds = lexical_predictability_analysis(data_path="text_samples_trunc_gpt2tokenfast")
         df_preds.to_csv("pred_scores_1sample_10levels.csv", index=False)
     else:
         df_preds = pd.read_csv("pred_scores_1samples.csv", index_col=[0])
-    visualize_predictability(visualize_predictability(df_preds))
+    # visualize_predictability(visualize_predictability(df_preds))
