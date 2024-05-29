@@ -76,8 +76,16 @@ def shuffle_sample(text_sample, disorder_level, max_tokens=-1):
     text_obj = nlp(text_sample) # nlp(clean_text(text_sample)) to clean from punctuation and lowercase
 
     # Get list of word tokens, up until optional max_tokens limit
-    words = [token.text for token in text_obj][:max_tokens]
+    words_all = [token.text for token in text_obj]
     # words = simple_tokeniser(text_sample_cleaned)
+
+    # Choose random starting index to truncate from, that should be the beginning of a sentence
+    trunc_start = random.choice(
+        [i for i, token in enumerate(words_all)
+         if i < len(words_all)-max_tokens and (i == 0 or words_all[i - 1] == ".") and token != "."])
+
+    # Truncate from this start index until this start index + max_tokens
+    words = words_all[trunc_start:trunc_start+max_tokens]
 
     # Create list of words' indices
     words_ids = [i for i in range(len(words))]
@@ -93,29 +101,16 @@ def shuffle_sample(text_sample, disorder_level, max_tokens=-1):
     words_ids_sampled_sorted = sorted(words_ids_sampled)
 
     # Create copy of initial words to be modified
-    # words_ids_shuffled = words_ids[:]
     words_sample_shuffled = words[:]
 
-    # Insert shuffled words in positions of unshuffled sampled indices
+    # Insert shuffled words at positions of unshuffled sampled indices
     for w_sampled_shuffled, w_sampled_sorted in zip (words_ids_sampled, words_ids_sampled_sorted):
         words_sample_shuffled[w_sampled_sorted] = words[w_sampled_shuffled]
-
-    # for i, wi in enumerate(words_ids_sampled_sorted):
-    #     # Fill positions of words sampled to be shuffled with shuffled words list
-    #     words_ids_shuffled[wi] = words_ids_sampled[i]
-
-    # # Insert shuffled indices in words order at positions of unshuffled sampled indices
-    # for i in range(len(words_ids_sampled)):
-    #     # Fill positions of words sampled to be shuffled with shuffled words list
-    #     words_ids_shuffled[words_ids_sampled_sorted[i]] = words_ids_sampled[i]
-    #
-    # # List of words ordered with shuffled sampled words
-    # words_shuffled = [words[word_id_shuffled] for word_id_shuffled in words_ids_shuffled]
 
     # Checks.
     set_ori = set(words)
     set_fin = set(words_sample_shuffled)
-    if set_ori!=set_fin:
+    if set_ori != set_fin:
         print("Diff vocab")
         print("Len words, words shuffled: ", len(set_ori), len(set_fin))
         print([(word_ori, word_fin) for word_ori, word_fin in zip(set_ori, set_fin) if word_ori != word_fin])
@@ -128,8 +123,11 @@ def shuffle_sample(text_sample, disorder_level, max_tokens=-1):
     # Join words with new order into a sentence again
     sample_shuffled = ' '.join(words_sample_shuffled)
 
+    # Also reconstruct tokenized and truncated original text sample to match tokenization effect
+    text_original = ' '.join(words)
+
     # Return shuffled sample as one string, and as a list of words
-    return sample_shuffled, words_sample_shuffled
+    return sample_shuffled, words_sample_shuffled, text_original, words
 
 def compute_shuffling_efficacy(words_original, words_shuffled):
     """
@@ -139,6 +137,7 @@ def compute_shuffling_efficacy(words_original, words_shuffled):
     :return: effective proportion of words that were shuffled
     """
     if len(set(words_original))!=len(set(words_shuffled)):
+        print(len(set(words_original)), len(set(words_shuffled)))
         raise ValueError("Number of words between original and shuffled sample not matching")
 
     shuffle_prop_eff = sum([words_original[i] != words_shuffled[i] for i in range(len(words_original))]) / len(
@@ -230,12 +229,7 @@ def generate_samples(n_k=100, data_path=None, max_tokens=-1):
             chap_id, text_sample = choose_random_chapter(chapters)
 
             # Shuffle text sample according to disorder level
-            text_shuffled, words_shuffled = shuffle_sample(text_sample, level, max_tokens=max_tokens)
-
-            # Tokenize and reconstruct original text sample to match tokenization effect on reconstructed shuffled sample
-            text_obj = nlp(text_sample)
-            words_original = [token.text for token in text_obj][:max_tokens]
-            text_original = ' '.join(words_original)
+            text_shuffled, words_shuffled, text_original, words_original = shuffle_sample(text_sample, level, max_tokens=max_tokens)
 
             dataset.append({
                 "disorder_level": level,
@@ -259,4 +253,4 @@ def generate_samples(n_k=100, data_path=None, max_tokens=-1):
 if __name__ == '__main__':
 
     # test_shuffling_efficacy(disorder_level=0.5, n=5)
-    generate_samples(n_k=1, data_path="text_samples_trunc", max_tokens=512)
+    generate_samples(n_k=100, data_path="text_samples_trunc64", max_tokens=64)
