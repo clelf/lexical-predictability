@@ -69,6 +69,7 @@ def word_by_word_predictability(model, tokenizer, text_sample, sample_id, level,
     # Create list to store prediction scores
     preds = []
 
+    # Wrapping function for multithreading
     def process_word(word_id, word):
         local_preds = []
 
@@ -142,7 +143,7 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
         preds = pd.DataFrame(preds)
 
         # Save preds
-        preds_file = os.path.join(results_path, f"_level{level*100:.0f}.pkl")
+        preds_file = f"{results_path}_level{level*100:.0f}.pkl"
         preds.to_pickle(preds_file)
         files.download(preds_file)
 
