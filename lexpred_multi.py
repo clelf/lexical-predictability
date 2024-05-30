@@ -134,16 +134,13 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
             preds.extend(preds_sample)
 
             # Clear memory before next loop
-            gc.collect()
-            if torch.cuda.is_available():
-                torch.cuda.empty_cache()
-
+            del preds_sample
 
             # if sample_id == 0: break # TODO: delete line
 
         # Convert data to DataFrame
         preds = pd.DataFrame(preds)
-        df_preds.to_csv(results_path, mode='a', index=False)
+        preds.to_csv(results_path, mode='a', index=False)
 
     return preds
 
