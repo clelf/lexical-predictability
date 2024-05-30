@@ -122,6 +122,7 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
 
     # Iterate over disorder level, samples and individual words
     for level in data.disorder_level.unique():
+        if level == 0.1: continue # Skip first level already downloaded
         # Create list to store predictability scores
         preds = []
 
