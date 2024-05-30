@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 import gc
-from google.colab import files
+# from google.colab import files
 
 
 
@@ -144,8 +144,8 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
         preds = pd.DataFrame(preds)
 
         # Save preds
-        preds_file = f"{results_path}_level{level*100:.0f}.pkl"
-        preds.to_pickle(preds_file)
+        preds_file = f"{results_path}_level{level*100:.0f}.csv"
+        preds.to_csv(preds_file, index=False)
         # files.download(preds_file)
 
 
