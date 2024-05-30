@@ -109,9 +109,6 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
     # Read text samples
     data = pd.read_csv(os.path.join(data_path, "text_samples.csv"))
 
-    # Prepare file to write to
-    with open(results_path, 'w') as f: pass
-
     # Define and load model
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
     model = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
@@ -140,7 +137,9 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
 
         # Convert data to DataFrame
         preds = pd.DataFrame(preds)
-        preds.to_csv(results_path, mode='a', index=False)
+
+        preds.to_pickle(os.path.join(results_path, f"_level{level*100:.0f}.csv"))
+
 
     return preds
 
@@ -148,5 +147,5 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
 
 if __name__ == '__main__':
 
-    lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path="/content/drive/MyDrive/lex-pred/pred_scores_trunc64_100samples_10levels.csv")
+    lexical_predictability_analysis(data_path="text_samples_trunc64", results_path="pred_scores_trunc64_100samples")
 
