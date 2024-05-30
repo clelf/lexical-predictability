@@ -146,7 +146,7 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
         # Save preds
         preds_file = f"{results_path}_level{level*100:.0f}.pkl"
         preds.to_pickle(preds_file)
-        files.download(preds_file)
+        # files.download(preds_file)
 
 
     return preds
@@ -155,5 +155,5 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
 
 if __name__ == '__main__':
 
-    lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path="pred_scores_trunc64_100samples")
+    lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path="/content/drive/MyDrive/lex-pred/pred_scores_trunc64_100samples")
 
