@@ -142,7 +142,7 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
         preds = pd.DataFrame(preds)
 
         # Save preds
-        preds_file = os.path.join(results_path, f"_level{level*100:.0f}.csv")
+        preds_file = os.path.join(results_path, f"_level{level*100:.0f}.pkl")
         preds.to_pickle(preds_file)
         files.download(preds_file)
 
@@ -153,5 +153,5 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
 
 if __name__ == '__main__':
 
-    lexical_predictability_analysis(data_path="text_samples_trunc64", results_path="pred_scores_trunc64_100samples")
+    lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path="pred_scores_trunc64_100samples")
 
