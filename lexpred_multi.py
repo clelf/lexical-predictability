@@ -133,18 +133,17 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
             preds_sample = word_by_word_predictability(model, tokenizer, sample['text_shuffled'], sample_id, level)
             preds.extend(preds_sample)
 
+            # Clear memory before next loop
+            gc.collect()
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
 
             # if sample_id == 0: break # TODO: delete line
 
-        # Clear memory after each batch
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-
         # Convert data to DataFrame
         preds = pd.DataFrame(preds)
-        df_preds.to_csv("pred_scores_trunc64_100samples_10levels.csv", mode='a', index=False)
-
+        df_preds.to_csv(results_path, mode='a', index=False)
 
     return preds
 
@@ -165,7 +164,7 @@ if __name__ == '__main__':
     compute_pred = True
 
     if compute_pred:
-        lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", batch_size=10)
+        lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path='"pred_scores_trunc64_100samples_10levels.csv"')
 
     else:
         df_preds = pd.read_csv("pred_scores_trunc64_1sample_10levels.csv")  # , index_col=[0]
