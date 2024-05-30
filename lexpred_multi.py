@@ -145,24 +145,8 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
     return preds
 
 
-def visualize_predictability(df_preds):
-    for level in df_preds['disorder_level'].unique():
-        ax = sns.lineplot(data=df_preds[df_preds['disorder_level'] == level], x='context_length', y='predictability',
-                          errorbar='se')
-        ax.set_title(f'Disorder level: {level}')
-        plt.show()
-        # plt.save(...)
-
-    pass
-
 
 if __name__ == '__main__':
 
-    compute_pred = True
+    lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path="/content/drive/MyDrive/lex-pred/pred_scores_trunc64_100samples_10levels.csv")
 
-    if compute_pred:
-        lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path='"pred_scores_trunc64_100samples_10levels.csv"')
-
-    else:
-        df_preds = pd.read_csv("pred_scores_trunc64_1sample_10levels.csv")  # , index_col=[0]
-        visualize_predictability(df_preds)
