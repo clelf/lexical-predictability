@@ -165,7 +165,7 @@ if __name__ == '__main__':
     compute_pred = True
 
     if compute_pred:
-        lexical_predictability_analysis(data_path="text_samples_trunc64", batch_size=10)
+        lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", batch_size=10)
 
     else:
         df_preds = pd.read_csv("pred_scores_trunc64_1sample_10levels.csv")  # , index_col=[0]
