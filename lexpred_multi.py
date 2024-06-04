@@ -1,28 +1,14 @@
 import concurrent.futures
-
 from transformers import GPT2TokenizerFast, GPT2LMHeadModel, BatchEncoding
-# from onnxruntime.transformers.gpt2_helper import Gpt2Helper, MyGPT2LMHeadModel
 import os
 import pandas as pd
 import torch
 import torch.nn.functional as F
 from tqdm.auto import tqdm
-import matplotlib.pyplot as plt
-import seaborn as sns
 import numpy as np
 import gc
-# from google.colab import files
 
 
-
-# TODO:
-"""
-- tokenize with Spacy
-- crop sample to ~64-128 tokens
-- iterate over spacy tokens
-- analyze only real word (isword, not punctuation)
-- for every real word, tokenize [context --> word id] with GPT2Tokenizer, and feed to model
-"""
 
 # Load to GPU
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -34,7 +20,7 @@ set_context_lengths = np.unique(np.logspace(0, np.log10(NUM_TOKENS - 2), num=6, 
 
 
 def get_next_word_predictability(model, encoded_input, next_word):
-    # next_word is a token_id, i.e. the id of the token within the tokenizer's vocabulary
+    # next_word is a GPT-2 token, i.e. the id of the token within the tokenizer's vocabulary
     with torch.no_grad():
         output = model(encoded_input)
         preds = F.softmax(output.logits, dim=-1)
@@ -43,15 +29,21 @@ def get_next_word_predictability(model, encoded_input, next_word):
 
 
 def crop_context(input, word_id, context_length):
-    # input is an Encoding instance containing items like tensor_ids and attention_mask
-    # returns an Encoding instance with tensors cropped to a length of context_length before word_id
+    """
+    Function that crops a text sequence given as input according to a finish index (word_id), and the length of tokens
+     to include before that index (context_length)
+    Returns a version of the input cropped to a length of context_length before word_id
+     """
     if isinstance(input, dict):
+        # In case input is an Encoding instance
         cropped_input = {key: input[key][:, word_id - context_length:word_id] for key in input.keys()}
         return BatchEncoding(cropped_input)
     elif isinstance(input, torch.Tensor):
+        # In case input is only the encoded tokens tensor
         cropped_input = input[:, word_id - context_length:word_id]
         return cropped_input
     elif isinstance(input, list):
+        # In case input is a list of tokens
         cropped_input = input[word_id - context_length:word_id]
         return cropped_input
 
@@ -116,7 +108,6 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
     # Define and load model
     tokenizer = GPT2TokenizerFast.from_pretrained('gpt2')
     model = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
-    # model = MyGPT2LMHeadModel.from_pretrained()
     model.eval()
 
 
@@ -138,15 +129,12 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
             # Clear memory before next loop
             del preds_sample
 
-            # if sample_id == 0: break # TODO: delete line
-
         # Convert data to DataFrame
         preds = pd.DataFrame(preds)
 
         # Save preds
         preds_file = f"{results_path}_level{level*100:.0f}.csv"
         preds.to_csv(preds_file, index=False)
-        # files.download(preds_file)
 
 
     return preds
@@ -155,5 +143,6 @@ def lexical_predictability_analysis(data_path, results_path, compare_original=Fa
 
 if __name__ == '__main__':
 
+    # Compute the word-by-word predictability analysis for all text samples, disorder levels and possible context length
     lexical_predictability_analysis(data_path="/content/drive/MyDrive/lex-pred/text_samples_trunc64", results_path="/content/drive/MyDrive/lex-pred/pred_scores_trunc64_100samples")
 
