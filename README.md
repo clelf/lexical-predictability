@@ -8,7 +8,7 @@ Following [1], I analyze text samples word by word, and for lengths of prior con
 
 Instead of patients data I simulate incoherent speech artificially by taking text samples from a free source and introduce increasing disorder levels, represented as randomly shuffling an increasing proportion of words with the text samples, and use the language model GPT-2 to assess words' predictability.
 
-The mehtods and results are presented in [...](...). The code in the repository is organized as follows:
+The mehtods and results are presented in [this report](https://github.com/clelf/lexical-predictability/blob/main/Linguistic_assignment_CLF.pdf). The code in the repository is organized as follows:
 
 - ```generate_text_samples.py```: generates a .csv file containing 1000 samples (100 per disorder level)
 - ```lexpred_multi.py```: computes the predictability scores for varying context length and disorder levels and save the scores as a .csv file
